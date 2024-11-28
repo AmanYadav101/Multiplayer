@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a69600e60324e91b554c993b0d6bf73, type: 3}
+  m_Name: MapSelectionData
+  m_EditorClassIdentifier: 
+  maps:
+  - MapThumbnail: {fileID: 21300000, guid: 3d205c9d5e8386c479bae29f86b1ba1e, type: 3}
+    MapName: Beach Farm
+    SceneName: BeachFarm
+  - MapThumbnail: {fileID: 21300000, guid: fe7d1be6e83a476499c3607806b1d654, type: 3}
+    MapName: Pkemon Map
+    SceneName: Pokemon
+  - MapThumbnail: {fileID: 21300000, guid: 853af1922e672914f8205a336cf01f6e, type: 3}
+    MapName: Town Map
+    SceneName: Town
+  - MapThumbnail: {fileID: 21300000, guid: defc87a4fbad06149a114ec09341bc3b, type: 3}
+    MapName: Undiscovered
+    SceneName: Undiscovered

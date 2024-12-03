@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,28 +7,49 @@ namespace Game
 {
     public class MainMenuController : MonoBehaviour
     {
-        [SerializeField] private GameObject _mainScreen;
+        [Header("Screens References")] [SerializeField]
+        private GameObject _mainScreen;
+
         [SerializeField] private GameObject _joinScreen;
-        [SerializeField] private Button _hostButton;
+        [SerializeField] private GameObject _nameScreen;
+
+        [Header("Button References")] [SerializeField]
+        private Button _hostButton;
+
         [SerializeField] private Button _joinButton;
-        [SerializeField] private Button _submitButtonClicked;
-        [SerializeField] private TextMeshProUGUI _codeText;
+        [SerializeField] private Button _submitButton;
+        [SerializeField] private Button _nameButton;
+        [SerializeField] private Button _okayNameButton;
+
+        [Header("Text References")] [SerializeField]
+        private TextMeshProUGUI _codeText;
+
+        [SerializeField] private TextMeshProUGUI _nameText;
+
+       
+        public static string playerName { get; private set; }
+        
 
         // Start is called before the first frame update
         void OnEnable()
         {
             _hostButton.onClick.AddListener(OnHostClicked);
             _joinButton.onClick.AddListener(OnJoinClicked);
-            _submitButtonClicked.onClick.AddListener(OnSubmitCodeClicked);
+            _submitButton.onClick.AddListener(OnSubmitCodeClicked);
+            _nameButton.onClick.AddListener(OnNameButtonClicked);
+            _okayNameButton.onClick.AddListener(OnOkayNameButtonClicked);
         }
 
 
         void OnDisable()
         {
-            _hostButton.onClick.RemoveListener(OnHostClicked);
-            _joinButton.onClick.RemoveListener(OnJoinClicked);
-            _submitButtonClicked.onClick.RemoveListener(OnSubmitCodeClicked);
+            _hostButton?.onClick.RemoveListener(OnHostClicked);
+            _joinButton?.onClick.RemoveListener(OnJoinClicked);
+            _submitButton?.onClick.RemoveListener(OnSubmitCodeClicked);
+            _nameButton?.onClick.RemoveAllListeners();
+            _okayNameButton?.onClick.RemoveAllListeners();
         }
+        
 
         private async void OnHostClicked()
         {
@@ -59,6 +77,24 @@ namespace Game
             {
                 SceneManager.LoadSceneAsync("Lobby");
             }
+        }
+
+        private void OnNameButtonClicked()
+        {
+            _mainScreen.SetActive(false);
+            _nameScreen.SetActive(true);
+        }
+
+        private void OnOkayNameButtonClicked()
+        {
+            playerName = _nameText.text;
+            PlayerPrefs.SetString("PlayerName", playerName);
+            PlayerPrefs.Save();
+            
+            Debug.Log(playerName);
+            
+            _mainScreen.SetActive(true);
+            _nameScreen.SetActive(false);
         }
     }
 }

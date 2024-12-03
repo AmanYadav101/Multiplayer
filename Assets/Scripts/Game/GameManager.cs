@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using GameFramework.Manager;
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    
     // Start is called before the first frame update
     void Start()
     {

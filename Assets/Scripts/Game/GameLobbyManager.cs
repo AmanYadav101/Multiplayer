@@ -45,7 +45,7 @@ namespace Game
         public async Task<bool> CreateLobby()
         {
             _localLobbyPlayerData = new LobbyPlayerData();
-            _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, "HostPlayer");
+            _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, PlayerPrefs.GetString("PlayerName"));
             _lobbyData = new LobbyData();
             _lobbyData.Initialize(0);
             bool succeeded = await LobbyManager.Instance.CreateLobby(_maxNumberOfPlayers, true, _localLobbyPlayerData.Serialize(), _lobbyData.Serialize());
@@ -56,7 +56,7 @@ namespace Game
         public async Task<bool> JoinLobby(string code)
         {
             _localLobbyPlayerData = new LobbyPlayerData();
-            _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, "JoinPlayer");
+            _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, PlayerPrefs.GetString("PlayerName"));
             bool succeeded = await LobbyManager.Instance.JoinLobby(code, _localLobbyPlayerData.Serialize());
             return succeeded;
         }

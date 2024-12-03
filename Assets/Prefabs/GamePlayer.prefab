@@ -12,11 +12,12 @@ GameObject:
   - component: {fileID: 2784059690010211933}
   - component: {fileID: 4419209909028895307}
   - component: {fileID: 4477152580028672779}
-  - component: {fileID: 4910030519165969244}
   - component: {fileID: 411433380529513318}
+  - component: {fileID: 4910030519165969244}
   - component: {fileID: 824302038591511352}
   - component: {fileID: 4403669242679400430}
   - component: {fileID: 680884876580994583}
+  - component: {fileID: 4001378914962092196}
   m_Layer: 0
   m_Name: GamePlayer
   m_TagString: Untagged
@@ -115,20 +116,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4910030519165969244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1798414211019053827}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d04584bf8b34c91910942881a4a3b2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _playerName: {fileID: 7038935037544981083}
-  _isReadyRenderer: {fileID: 0}
 --- !u!114 &411433380529513318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,6 +137,20 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &4910030519165969244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798414211019053827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d04584bf8b34c91910942881a4a3b2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerName: {fileID: 7038935037544981083}
+  _isReadyRenderer: {fileID: 0}
 --- !u!114 &824302038591511352
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,10 +220,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c2943d1bef68ab4eb8e3336f4c307b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 10
-  _turnSpeed: 10
   _minMaxRotationX: {x: 90, y: -90}
   _camTransform: {fileID: 1950953357108461602}
+--- !u!114 &4001378914962092196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798414211019053827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03a073ce661496f98f38e99fe17ad77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cc: {fileID: 4403669242679400430}
+  _speed: 10
+  _turnSpeed: 10
+  _camSocket: {fileID: 7820818757535724205}
+  _vcam: {fileID: 6987832243418262171}
 --- !u!1 &2316418169861099616
 GameObject:
   m_ObjectHideFlags: 0

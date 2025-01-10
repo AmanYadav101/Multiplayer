@@ -1,6 +1,6 @@
-using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GameFramework.Network.Movement
 {
@@ -9,69 +9,49 @@ namespace GameFramework.Network.Movement
         [SerializeField] private CharacterController _cc;
         [SerializeField] private float _speed;
         [SerializeField] private float _turnSpeed;
-
+private Vector2 _accumulatedRotation;
         [SerializeField] private Transform _camSocket;
         [SerializeField] private GameObject _vcam;
 
-        private Transform _vcamTransform;
-
+        private Transform _vCamTransform;
+        private Vector3 _targetDirection;
         private int _tick = 0;
-        private float _tickRate = 1f / 144f;
+        private float _tickRate = 1f / 60;
         private float _tickDeltaTime = 0f;
 
         private const int BUFFER_SIZE = 1024;
-        private InputState[] _inputStates = new InputState[BUFFER_SIZE];
-        private TransformState[] _transformStates = new TransformState[BUFFER_SIZE];
+        private readonly InputState[] _inputStates = new InputState[BUFFER_SIZE];
+        private readonly TransformState[] _transformStates = new TransformState[BUFFER_SIZE];
 
-        public NetworkVariable<TransformState> ServerTransformState = new NetworkVariable<TransformState>();
-        public TransformState _previousTransformState;
-
+        public NetworkVariable<TransformState> serverTransformState = new NetworkVariable<TransformState>();
+        private TransformState _previousTransformState;
 
         private void OnEnable()
         {
-            ServerTransformState.OnValueChanged += OnServerStateChanged;
+            serverTransformState.OnValueChanged += OnServerStateChanged;
         }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            _vcamTransform = _vcam.transform;
+            _vCamTransform = _vcam.transform;
         }
 
-        private void OnServerStateChanged(TransformState previousvalue, TransformState newvalue)
+        private void OnServerStateChanged(TransformState previousValue, TransformState newValue)
         {
-            _previousTransformState = previousvalue;
+            _previousTransformState = previousValue;
         }
 
         public void ProcessLocalPlayerMovement(Vector2 movementInput, Vector2 lookInput)
         {
-            Debug.Log("ProcessLocalPlayerMovement");
-
             _tickDeltaTime += Time.deltaTime;
             if (_tickDeltaTime > _tickRate)
             {
                 int bufferIndex = _tick % BUFFER_SIZE;
-                if (!IsServer)
-                {
-                    MovePlayerServerRPC(_tick, movementInput, lookInput);
-                    MovePlayer(movementInput);
-                    RotatePlayer(lookInput);
-                }
-                else
-                {
-                    MovePlayer(movementInput);
-                    RotatePlayer(lookInput);
 
-                    TransformState state = new TransformState()
-                    {
-                        Tick = _tick,
-                        Position = transform.position,
-                        Rotation = transform.rotation,
-                        HasStartedMoving = true
-                    };
-                    _previousTransformState = ServerTransformState.Value;
-                    ServerTransformState.Value = state;
-                }
+                MovePlayerServerRPC(_tick, movementInput, lookInput);
+                MovePlayer(movementInput);
+                RotatePlayer(lookInput);
 
                 InputState inputState = new InputState()
                 {
@@ -91,98 +71,72 @@ namespace GameFramework.Network.Movement
                 _transformStates[bufferIndex] = transformState;
 
                 _tickDeltaTime -= _tickRate;
-                _tick++;
+                if (_tick == BUFFER_SIZE)
+                {
+                    _tick = 0;
+                }
+                else
+                    _tick++;
             }
         }
 
 
         public void ProcessSimulatedPlayerMovement()
         {
-            Debug.Log("ProcessSimulatedPlayerMovement");
             _tickDeltaTime += Time.deltaTime;
             if (_tickDeltaTime > _tickRate)
             {
-                if (ServerTransformState.Value.HasStartedMoving)
+                if (serverTransformState.Value.HasStartedMoving)
                 {
-                    transform.position = ServerTransformState.Value.Position;
-                    transform.rotation = ServerTransformState.Value.Rotation;
+                    transform.position = serverTransformState.Value.Position;
+                    transform.rotation = serverTransformState.Value.Rotation;
                 }
-        
+
                 _tickDeltaTime -= _tickRate;
-                _tick++;
+                if (_tick == BUFFER_SIZE)
+                {
+                    _tick = 0;
+                }
+                else
+                {
+                    _tick++;
+                }
             }
         }
-
         
-        // private Vector3 extrapolatedPosition;
-        // private Quaternion extrapolatedRotation;
-        //
-        // public void ProcessSimulatedPlayerMovement()
-        // {
-        //     _tickDeltaTime += Time.deltaTime;
-        //
-        //     if (ServerTransformState.Value.HasStartedMoving)
-        //     {
-        //         // Predict the next position based on the velocity and direction
-        //         Vector3 movementVector = ServerTransformState.Value.Position - _previousTransformState.Position;
-        //         extrapolatedPosition = ServerTransformState.Value.Position + movementVector;
-        //
-        //         // Predict the next rotation
-        //         extrapolatedRotation = ServerTransformState.Value.Rotation;
-        //
-        //         // Smooth transition to the predicted values
-        //         transform.position = Vector3.Lerp(
-        //             transform.position,
-        //             extrapolatedPosition,
-        //             Time.deltaTime * 5f // Adjust extrapolation speed
-        //         );
-        //
-        //         transform.rotation = Quaternion.Slerp(
-        //             transform.rotation,
-        //             extrapolatedRotation,
-        //             Time.deltaTime * 5f // Adjust extrapolation speed
-        //         );
-        //     }
-        //
-        //     _tickDeltaTime -= _tickRate;
-        //     _tick++;
-        // }
 
 
         private void MovePlayer(Vector2 movementInput)
         {
-            if (_cc == null)
-            {
-                Debug.LogError("_cc (CharacterController) is null in MovePlayer.");
-                return;
-            }
-
-            if (_vcamTransform == null)
-            {
-                Debug.LogError("_vcamTransform is null in MovePlayer.");
-                return;
-            }
-
-
-            Vector3 movement = movementInput.x * _vcamTransform.right + movementInput.y * _vcamTransform.forward;
-            movement.y = 0; // Flatten movement on the Y axis
+            Vector3 dir = Vector3.zero;
+            dir.x = movementInput.x;
+            dir.z = movementInput.y;
+            Vector3 camDirection = _vCamTransform.rotation * dir;
+            _targetDirection = new Vector3(camDirection.x, 0, camDirection.z);
             if (!_cc.isGrounded)
             {
-                movement.y = -9.61f; // Simulate gravity
+                _targetDirection.y = -9.8f;
             }
 
-            _cc.Move(movement * _speed * _tickRate);
+            _cc.Move(_targetDirection.normalized * (_speed * _tickRate));
         }
 
 
         private void RotatePlayer(Vector2 lookInput)
         {
-            _vcamTransform.RotateAround(_vcamTransform.position, _vcamTransform.right,
-                -lookInput.y * _turnSpeed * _tickRate);
+            // float rotationAmountX = lookInput.x * _speed * _tickRate;
+            // _accumulatedRotation.x +=rotationAmountX;
+            // float rotationAmountY = lookInput.y * _speed * _tickRate;
+            // _accumulatedRotation.y += rotationAmountY;
+            // transform.rotation = Quaternion.Euler(0, _accumulatedRotation.x, -_accumulatedRotation.y);
+            //
+            
             transform.RotateAround(transform.position, transform.up, lookInput.x * _turnSpeed * _tickRate);
+            _vCamTransform.RotateAround(_vCamTransform.position, _vCamTransform.right,
+                -lookInput.y * _turnSpeed * _tickRate);
         }
 
-        [ServerRpc]
+        [Rpc(SendTo.Server)]
         private void MovePlayerServerRPC(int tick, Vector2 movementInput, Vector2 lookInput)
         {
             MovePlayer(movementInput);
@@ -197,8 +151,8 @@ namespace GameFramework.Network.Movement
             };
 
 
-            _previousTransformState = ServerTransformState.Value;
-            ServerTransformState.Value = state;
+            _previousTransformState = serverTransformState.Value;
+            serverTransformState.Value = state;
         }
     }
 }

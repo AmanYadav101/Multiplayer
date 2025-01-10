@@ -1,38 +1,3 @@
-// using Unity.Netcode;
-// using UnityEngine;
-// namespace GameFramework.Network.Movement
-// {
-//     public class TransformState:INetworkSerializable
-//     {
-//         public int Tick;
-//         public Vector3 Position;
-//         public Quaternion Rotation;
-//         public bool HasStartedMoving;
-//         
-//         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-//         {
-//             if (serializer.IsReader)
-//             {
-//                 var reader = serializer.GetFastBufferReader();
-//                 reader.ReadValue(out Tick);
-//                 reader.ReadValue(out Position);
-//                 reader.ReadValue(out Rotation);
-//                 reader.ReadValue(out HasStartedMoving);
-//                 
-//             }
-//             else
-//             {
-//                 var writer = serializer.GetFastBufferWriter();
-//                 writer.WriteValue(Tick);
-//                 writer.WriteValue(Position);
-//                 writer.WriteValue(Rotation);
-//                 writer.WriteValue(HasStartedMoving);
-//             }
-//         }
-//     }
-// }
-
-
 using System;
 using Unity.Netcode;
 using UnityEngine;

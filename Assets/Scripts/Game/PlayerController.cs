@@ -1,28 +1,32 @@
-using System;
-using System.Collections;
 using Cinemachine;
+using Game.States;
 using GameFramework.Network.Movement;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : NetworkBehaviour
 {
     // [SerializeField] private float _speed;
     // [SerializeField] private float _turnSpeed;
-    [SerializeField] private Vector2 _minMaxRotationX;
+    // [SerializeField] private Vector2 _minMaxRotationX;
+
     [SerializeField] private Transform _camTransform;
     [SerializeField] private GameObject _projectilePrefab;
     [SerializeField] private Transform _projectileSpawnPoint;
-    private NetworkMovementComponent _playerMovement;
-    private CharacterController _cc;
+    public CharacterController _characterController;
 
-    private Input _playerControl;
+    //States
+    private State _currentState;
+    private IdleState _idleState;
+    private RunState _runState;
+    private AirState _airState;
+
+    public Input playerControl;
+    public NetworkMovementComponent playerMovement;
     private float _cameraAngle;
-    private ulong clientId;
 
     public override void OnNetworkSpawn()
     {
@@ -33,12 +37,76 @@ public class PlayerController : NetworkBehaviour
 
     private void Awake()
     {
-        _playerMovement = GetComponent<NetworkMovementComponent>();
-        _playerControl = new Input();
+        _characterController = GetComponent<CharacterController>();
+        playerControl = new Input();
+        playerMovement = GetComponent<NetworkMovementComponent>();
 
-        _playerControl.Player.Shoot.started += ctx => StartShooting();
+        _idleState = new IdleState(this);
+        _runState = new RunState(this);
+        _airState = new AirState(this);
+
+        _currentState = _idleState;
+        _currentState.Enter();
+
+        playerControl.Player.Shoot.started += ctx => StartShooting();
     }
 
+    private void OnEnable()
+    {
+        playerControl.Enable();
+    }
+
+    private void OnDisable()
+    {
+        playerControl.Disable();
+    }
+
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    private void Update()
+    {
+     bool isGrounded = _characterController.isGrounded;
+     if (!isGrounded)
+     {
+         _characterController.Move(new Vector3(0.0f, -9.8f * Time.deltaTime, 0.0f));   
+     }
+        Vector2 lookInput = playerControl.Player.Look.ReadValue<Vector2>();
+        playerMovement.RotatePlayer(lookInput);
+        CurrentState();
+        _currentState?.Do();
+    }
+
+    void CurrentState()
+    {
+        Vector2 movementInput = playerControl.Player.Move.ReadValue<Vector2>();
+        var jumpInput = playerControl.Player.Jump.ReadValue<float>();
+        if (movementInput != Vector2.zero)
+        {
+            ChangeState(_runState);
+        }
+        else if (movementInput == Vector2.zero)
+        {
+            ChangeState(_idleState);
+        }
+
+
+        if (jumpInput != 0)
+        {
+            ChangeState(_airState);
+        }
+    }
+
+    private void ChangeState(State newState)
+    {
+        if (_currentState == newState) return;
+
+        _currentState?.Exit();
+        _currentState = newState;
+        _currentState?.Enter();
+    }
 
     private void StartShooting()
     {
@@ -53,57 +121,5 @@ public class PlayerController : NetworkBehaviour
         projectile.GetComponent<NetworkObject>().Spawn(true);
         projectile.GetComponent<Rigidbody>().AddForce(_projectileSpawnPoint.right * -10f, ForceMode.Impulse);
         Destroy(projectile, 5);
-    }
-
-
-    private void OnEnable()
-    {
-        _playerControl.Enable();
-    }
-
-    private void OnDisable()
-    {
-        _playerControl.Disable();
-    }
-
-    void Start()
-    {
-        _playerMovement = GetComponent<NetworkMovementComponent>();
-        if (_playerMovement == null)
-        {
-            Debug.LogError("NetworkMovementComponent is not attached to the GameObject.");
-        }
-
-        _cc = GetComponent<CharacterController>();
-        if (_cc == null)
-        {
-            Debug.LogError("CharacterController is not attached to the GameObject.");
-        }
-
-
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-
-    private void Update()
-    {
-        Vector2 movementInput = _playerControl.Player.Move.ReadValue<Vector2>();
-        Vector2 lookInput = _playerControl.Player.Look.ReadValue<Vector2>();
-
-
-        if (_playerMovement)
-        {
-            if (IsClient && IsLocalPlayer)
-            {
-                _playerMovement.ProcessLocalPlayerMovement(movementInput, lookInput);
-            }
-            else
-            {
-                _playerMovement.ProcessSimulatedPlayerMovement();
-            }
-        }
-        else
-        {
-            Debug.LogError("NetworkMovementComponent is null, skipping movement processing.");
-        }
     }
 }

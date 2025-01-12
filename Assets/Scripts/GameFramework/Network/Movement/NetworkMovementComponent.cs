@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,7 +10,7 @@ namespace GameFramework.Network.Movement
         [SerializeField] private CharacterController _cc;
         [SerializeField] private float _speed;
         [SerializeField] private float _turnSpeed;
-private Vector2 _accumulatedRotation;
+        private Vector2 _accumulatedRotation;
         [SerializeField] private Transform _camSocket;
         [SerializeField] private GameObject _vcam;
 
@@ -37,6 +38,8 @@ private Vector2 _accumulatedRotation;
             _vCamTransform = _vcam.transform;
         }
 
+      
+
         private void OnServerStateChanged(TransformState previousValue, TransformState newValue)
         {
             _previousTransformState = previousValue;
@@ -51,13 +54,12 @@ private Vector2 _accumulatedRotation;
 
                 MovePlayerServerRPC(_tick, movementInput, lookInput);
                 MovePlayer(movementInput);
-                RotatePlayer(lookInput);
 
                 InputState inputState = new InputState()
                 {
                     Tick = _tick,
                     MovementInput = movementInput,
-                    LookInput = lookInput
+                    // LookInput = lookInput
                 };
                 TransformState transformState = new TransformState()
                 {
@@ -113,24 +115,12 @@ private Vector2 _accumulatedRotation;
             dir.z = movementInput.y;
             Vector3 camDirection = _vCamTransform.rotation * dir;
             _targetDirection = new Vector3(camDirection.x, 0, camDirection.z);
-            if (!_cc.isGrounded)
-            {
-                _targetDirection.y = -9.8f;
-            }
-
             _cc.Move(_targetDirection.normalized * (_speed * _tickRate));
         }
 
 
-        private void RotatePlayer(Vector2 lookInput)
+        public void RotatePlayer(Vector2 lookInput)
         {
-            // float rotationAmountX = lookInput.x * _speed * _tickRate;
-            // _accumulatedRotation.x +=rotationAmountX;
-            // float rotationAmountY = lookInput.y * _speed * _tickRate;
-            // _accumulatedRotation.y += rotationAmountY;
-            // transform.rotation = Quaternion.Euler(0, _accumulatedRotation.x, -_accumulatedRotation.y);
-            //
-            
             transform.RotateAround(transform.position, transform.up, lookInput.x * _turnSpeed * _tickRate);
             _vCamTransform.RotateAround(_vCamTransform.position, _vCamTransform.right,
                 -lookInput.y * _turnSpeed * _tickRate);

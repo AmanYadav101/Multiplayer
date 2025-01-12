@@ -6,6 +6,6 @@ namespace GameFramework.Network.Movement
     {
         public int Tick;
         public Vector2 MovementInput;
-        public Vector2 LookInput;
+        // public Vector2 LookInput;
     }
 }

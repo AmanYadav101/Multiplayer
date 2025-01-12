@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2468092435
+  GlobalObjectIdHash: 976521040
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -224,10 +224,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c2943d1bef68ab4eb8e3336f4c307b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _minMaxRotationX: {x: 90, y: -90}
   _camTransform: {fileID: 1950953357108461602}
   _projectilePrefab: {fileID: 5853114321687335365, guid: 95810bd6b2b18e44987f35fc9779df70, type: 3}
   _projectileSpawnPoint: {fileID: 7868013836103354425}
+  playerMovement: {fileID: 0}
 --- !u!114 &4667356908942099807
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254,7 +254,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthBar: {fileID: 7357910238093526506}
-  healthPoints: 100
+  healthPoints:
+    m_InternalValue: 100
 --- !u!114 &4001378914962092196
 MonoBehaviour:
   m_ObjectHideFlags: 0

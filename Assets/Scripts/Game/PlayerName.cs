@@ -9,15 +9,16 @@ namespace Game
 {
     public class PlayerName : NetworkBehaviour
     {
+        
         [SerializeField] private TextMeshPro playerName;
 
-        private NetworkVariable<FixedString64Bytes> _networkPlayerName = new NetworkVariable<FixedString64Bytes>();
+        private readonly NetworkVariable<FixedString64Bytes> _networkPlayerName = new NetworkVariable<FixedString64Bytes>();
 
         private void Start()
         {
             if (IsOwner)
             {
-                var playerNameText = PlayerPrefs.GetString("PlayerName", "Player");
+                var playerNameText = MainMenuController.playerName;
                 SetPlayerNameServerRPC(playerNameText);
             }
         }
@@ -32,9 +33,9 @@ namespace Game
             _networkPlayerName.OnValueChanged -= OnValueChanged;
         }
 
-        private void OnValueChanged(FixedString64Bytes previousvalue, FixedString64Bytes newvalue)
+        private void OnValueChanged(FixedString64Bytes previousValue, FixedString64Bytes newValue)
         {
-            playerName.SetText(newvalue.ToString());
+            playerName.SetText(newValue.ToString());
         }
 
         [ServerRpc]

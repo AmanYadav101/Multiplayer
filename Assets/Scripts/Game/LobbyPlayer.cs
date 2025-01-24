@@ -26,7 +26,7 @@ namespace Game
 
             if (_data.IsReady)
             {
-                if (_isReadyRenderer != null)
+                if (_isReadyRenderer)
                 {
                     _isReadyRenderer.GetPropertyBlock(_propertyBlock);
                     _propertyBlock.SetColor("_BaseColor", Color.green);

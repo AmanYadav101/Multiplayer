@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -26,9 +27,9 @@ namespace Game
 
         [SerializeField] private TextMeshProUGUI _nameText;
 
-       
+
         public static string playerName { get; private set; }
-        
+
 
         // Start is called before the first frame update
         void OnEnable()
@@ -49,7 +50,7 @@ namespace Game
             _nameButton?.onClick.RemoveAllListeners();
             _okayNameButton?.onClick.RemoveAllListeners();
         }
-        
+
 
         private async void OnHostClicked()
         {
@@ -89,11 +90,11 @@ namespace Game
         private void OnOkayNameButtonClicked()
         {
             playerName = _nameText.text;
+            
             PlayerPrefs.SetString("PlayerName", playerName);
             PlayerPrefs.Save();
-            
+
             Debug.Log(playerName);
-            
             _mainScreen.SetActive(true);
             _nameScreen.SetActive(false);
         }

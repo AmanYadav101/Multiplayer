@@ -16,11 +16,12 @@ namespace Game
 
         private void Start()
         {
-            if (IsOwner)
-            {
-                var playerNameText = MainMenuController.playerName;
-                SetPlayerNameServerRPC(playerNameText);
-            }
+            if (!IsOwner) return;
+            var playerNameText = MainMenuController.playerName;
+            SetPlayerNameServerRPC(playerNameText);
+          
+               
+            
         }
 
         private void OnEnable()
@@ -43,6 +44,13 @@ namespace Game
         {
             _networkPlayerName.Value = newName;
         }
-        
+
+        private void Update()
+        {
+            if (playerName.text != _networkPlayerName.Value.ToString())
+            {
+                playerName.text = _networkPlayerName.Value.ToString();
+            }
+        }
     }
 }

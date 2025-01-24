@@ -91,10 +91,6 @@ namespace Game
         {
             playerName = _nameText.text;
             
-            PlayerPrefs.SetString("PlayerName", playerName);
-            PlayerPrefs.Save();
-
-            Debug.Log(playerName);
             _mainScreen.SetActive(true);
             _nameScreen.SetActive(false);
         }

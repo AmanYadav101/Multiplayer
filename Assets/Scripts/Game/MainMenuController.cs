@@ -73,6 +73,7 @@ namespace Game
             code = code.Substring(0, code.Length - 1);
 
             bool succeeded = await GameLobbyManager.Instance.JoinLobby(code);
+            // Debug.Log("Succeeded in main menu controller-> "+succeeded);
             if (succeeded)
             {
                 SceneManager.LoadSceneAsync("Lobby");

@@ -23,7 +23,7 @@ namespace Game
         private void OnLobbyUpdated()
         {
             List<LobbyPlayerData> playerDatas = GameLobbyManager.Instance.GetPlayers();
-
+Debug.Log("Player data count:- " + playerDatas.Count);
             for (int i = 0; i < playerDatas.Count; i++)
             {
                 LobbyPlayerData data = playerDatas[i];

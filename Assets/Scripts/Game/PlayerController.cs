@@ -1,3 +1,4 @@
+using System;
 using Cinemachine;
 using Game.States;
 using GameFramework.Network.Movement;
@@ -6,26 +7,23 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 
-[RequireComponent(typeof(CharacterController))]
 public class PlayerController : NetworkBehaviour
 {
-    // [SerializeField] private float _speed;
-    // [SerializeField] private float _turnSpeed;
-    // [SerializeField] private Vector2 _minMaxRotationX;
-
     [SerializeField] private Transform _camTransform;
     [SerializeField] private GameObject _projectilePrefab;
     [SerializeField] private Transform _projectileSpawnPoint;
-    public CharacterController _characterController;
-
+  
     //States
     private State _currentState;
     private IdleState _idleState;
     private RunState _runState;
     private AirState _airState;
 
+    //Input
     public Input playerControl;
-    public NetworkMovementComponent playerMovement;
+
+    [HideInInspector] public NetworkMovementComponent playerMovement;
+    [HideInInspector] public new Rigidbody rigidbody;
     private float _cameraAngle;
 
     public override void OnNetworkSpawn()
@@ -37,7 +35,8 @@ public class PlayerController : NetworkBehaviour
 
     private void Awake()
     {
-        _characterController = GetComponent<CharacterController>();
+        rigidbody = GetComponent<Rigidbody>();
+        
         playerControl = new Input();
         playerMovement = GetComponent<NetworkMovementComponent>();
 
@@ -68,13 +67,12 @@ public class PlayerController : NetworkBehaviour
 
     private void Update()
     {
-     bool isGrounded = _characterController.isGrounded;
-     if (!isGrounded)
-     {
-         _characterController.Move(new Vector3(0.0f, -9.8f * Time.deltaTime, 0.0f));   
-     }
-        Vector2 lookInput = playerControl.Player.Look.ReadValue<Vector2>();
-        playerMovement.RotatePlayer(lookInput);
+        var lookInput = playerControl.Player.Look.ReadValue<Vector2>();
+
+        if (playerMovement.IsOwner)
+            playerMovement.RotatePlayerServerRPC(lookInput);
+        
+        
         CurrentState();
         _currentState?.Do();
     }
@@ -82,20 +80,17 @@ public class PlayerController : NetworkBehaviour
     void CurrentState()
     {
         Vector2 movementInput = playerControl.Player.Move.ReadValue<Vector2>();
-        var jumpInput = playerControl.Player.Jump.ReadValue<float>();
-        if (movementInput != Vector2.zero)
+        if (playerControl.Player.Jump.triggered && playerMovement.isGrounded)
+        {
+            ChangeState(_airState);
+        }
+        else if (movementInput != Vector2.zero)
         {
             ChangeState(_runState);
         }
         else if (movementInput == Vector2.zero)
         {
             ChangeState(_idleState);
-        }
-
-
-        if (jumpInput != 0)
-        {
-            ChangeState(_airState);
         }
     }
 

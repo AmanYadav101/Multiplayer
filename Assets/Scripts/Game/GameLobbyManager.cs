@@ -6,6 +6,7 @@ using Game.Data;
 using GameFramework.Events;
 using GameFramework.Manager;
 using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -48,6 +49,7 @@ namespace Game
             _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, PlayerPrefs.GetString("PlayerName"));
             _lobbyData = new LobbyData();
             _lobbyData.Initialize(0);
+            Debug.Log("_max number of players : " + _maxNumberOfPlayers);
             bool succeeded = await LobbyManager.Instance.CreateLobby(_maxNumberOfPlayers, true, _localLobbyPlayerData.Serialize(), _lobbyData.Serialize());
             return succeeded;
         }
@@ -57,7 +59,9 @@ namespace Game
         {
             _localLobbyPlayerData = new LobbyPlayerData();
             _localLobbyPlayerData.Initialize(AuthenticationService.Instance.PlayerId, PlayerPrefs.GetString("PlayerName"));
+            Debug.Log("max number of players : " + _maxNumberOfPlayers + " Player Id-> " + AuthenticationService.Instance.PlayerId);
             bool succeeded = await LobbyManager.Instance.JoinLobby(code, _localLobbyPlayerData.Serialize());
+
             return succeeded;
         }
 
@@ -84,6 +88,7 @@ namespace Game
                 }
 
                 _lobbyPlayerData.Add(lobbyPlayerData);
+                Debug.Log("Player data:- " + data);
             }
             _lobbyData = new LobbyData();
             _lobbyData.Initialize(lobby.Data);
@@ -151,5 +156,7 @@ namespace Game
 
             return true;
         }
+        
+        
     }
 }

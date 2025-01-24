@@ -36,7 +36,7 @@ namespace Game
                 Events.LobbyEvents.OnLobbyReady += OnLobbyReady;
             }
 
-            LobbyEvents.OnLobbyUpdated += OnLobbyUpdated;
+            LobbyEvents.OnLobbyUpdated += OnLobbyMapUpdated;
         }
 
 
@@ -47,7 +47,7 @@ namespace Game
             _rightButton.onClick.RemoveAllListeners();
             _startButton.onClick.RemoveAllListeners();
 
-            LobbyEvents.OnLobbyUpdated -= OnLobbyUpdated;
+            LobbyEvents.OnLobbyUpdated -= OnLobbyMapUpdated;
             Events.LobbyEvents.OnLobbyReady -= OnLobbyReady;
         }
 
@@ -67,6 +67,7 @@ namespace Game
             }
         }
 
+        //Handles the Map changing logic when left button is pressed
         private async void OnLeftButtonClicked()
         {
             if (_currentMapIndex - 1 > 0)
@@ -82,7 +83,8 @@ namespace Game
             await GameLobbyManager.Instance.SetSelectedMap(_currentMapIndex,
                 _mapSelectionData.maps[_currentMapIndex].SceneName);
         }
-
+        
+        //Handles the Map changing logic when right button is pressed
         private async void OnRightButtonClicked()
         {
             if (_currentMapIndex + 1 < _mapSelectionData.maps.Count - 1)
@@ -114,7 +116,7 @@ namespace Game
             }
         }
 
-        private void OnLobbyUpdated()
+        private void OnLobbyMapUpdated()
         {
             _currentMapIndex = GameLobbyManager.Instance.GetMapIndex();
             UpdateMap();

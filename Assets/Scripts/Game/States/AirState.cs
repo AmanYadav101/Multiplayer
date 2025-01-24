@@ -2,14 +2,12 @@ using UnityEngine;
 
 namespace Game.States
 {
-    public class AirState : State
+    public class AirState : RunState
     {
-        public Vector3 jump;
-        public float jumpForce = 20f;
-        public AirState(PlayerController player)
+        private float _jumpForce = 5f;
+        public AirState(PlayerController player) : base(player)
         {
             _player = player;
-            jump = new Vector3(0.0f,1.0f, 0.0f);
         }
 
         public override void Enter()
@@ -20,6 +18,8 @@ namespace Game.States
 
         public override void Do()
         {
+            base.Do();
+            _player.rigidbody.AddForce(_player.gameObject.transform.up*_jumpForce, ForceMode.Impulse);
         }
 
         public override void FixedDo()

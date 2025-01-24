@@ -7,13 +7,13 @@ namespace GameFramework.Network.Movement
 {
     public class NetworkMovementComponent : NetworkBehaviour
     {
-        [SerializeField] private CharacterController _cc;
+        // [SerializeField] private CharacterController _cc;
         [SerializeField] private float _speed;
         [SerializeField] private float _turnSpeed;
         private Vector2 _accumulatedRotation;
         [SerializeField] private Transform _camSocket;
         [SerializeField] private GameObject _vcam;
-
+        Rigidbody _rigidbody;
         private Transform _vCamTransform;
         private Vector3 _targetDirection;
         private int _tick = 0;
@@ -27,6 +27,17 @@ namespace GameFramework.Network.Movement
         public NetworkVariable<TransformState> serverTransformState = new NetworkVariable<TransformState>();
         private TransformState _previousTransformState;
 
+
+        //Grounded
+        [HideInInspector] public bool isGrounded;
+        [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private float rayLength = 1;
+
+        private void Awake()
+        {
+            _rigidbody = GetComponent<Rigidbody>();
+        }
+
         private void OnEnable()
         {
             serverTransformState.OnValueChanged += OnServerStateChanged;
@@ -38,11 +49,15 @@ namespace GameFramework.Network.Movement
             _vCamTransform = _vcam.transform;
         }
 
-      
 
         private void OnServerStateChanged(TransformState previousValue, TransformState newValue)
         {
             _previousTransformState = previousValue;
+        }
+
+        private void Update()
+        {
+            isGrounded = Physics.Raycast(transform.position, Vector2.down, rayLength, groundLayer);
         }
 
         public void ProcessLocalPlayerMovement(Vector2 movementInput, Vector2 lookInput)
@@ -105,23 +120,26 @@ namespace GameFramework.Network.Movement
                 }
             }
         }
-        
 
 
         private void MovePlayer(Vector2 movementInput)
         {
-            Vector3 dir = Vector3.zero;
-            dir.x = movementInput.x;
-            dir.z = movementInput.y;
+            Vector3 dir = new Vector3(movementInput.x, 0, movementInput.y);
+
             Vector3 camDirection = _vCamTransform.rotation * dir;
             _targetDirection = new Vector3(camDirection.x, 0, camDirection.z);
-            _cc.Move(_targetDirection.normalized * (_speed * _tickRate));
+            Vector3 currentVelocity = _rigidbody.velocity;
+
+            Vector3 newVelocity = _targetDirection.normalized * (_speed);
+            newVelocity.y = currentVelocity.y;
+            _rigidbody.velocity = newVelocity;
         }
 
 
-        public void RotatePlayer(Vector2 lookInput)
+        private void RotatePlayer(Vector2 lookInput)
         {
             transform.RotateAround(transform.position, transform.up, lookInput.x * _turnSpeed * _tickRate);
+
             _vCamTransform.RotateAround(_vCamTransform.position, _vCamTransform.right,
                 -lookInput.y * _turnSpeed * _tickRate);
         }
@@ -130,7 +148,7 @@ namespace GameFramework.Network.Movement
         private void MovePlayerServerRPC(int tick, Vector2 movementInput, Vector2 lookInput)
         {
             MovePlayer(movementInput);
-            RotatePlayer(lookInput);
+
 
             TransformState state = new TransformState()
             {
@@ -143,6 +161,12 @@ namespace GameFramework.Network.Movement
 
             _previousTransformState = serverTransformState.Value;
             serverTransformState.Value = state;
+        }
+
+        [Rpc(SendTo.Server)]
+        public void RotatePlayerServerRPC(Vector2 lookInput)
+        {
+            RotatePlayer(lookInput);
         }
     }
 }
